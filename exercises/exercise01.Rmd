@@ -1,0 +1,105 @@
+---
+title: "Exercise 1"
+author: "Philipp Drebes"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+header-includes:
+   - \usepackage{siunitx}
+output:
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Task 1: Logistic regression for churn prediction
+
+a)  Load the file "churnData.txt" it into R. Plot the data and fit a logistic regression model on the data set with "churn" as dependent variable.
+
+```{r}
+churn <- read.table("../data/churnData.txt",header=TRUE,sep="")
+summary(churn)
+plot(churn ~ number.customer.service.calls, data = churn)
+```
+
+```{r}
+fit <- glm(churn ~ number.customer.service.calls, family = 'binomial', data = churn)
+```
+
+b)  Analyze your learned model using the summary() command. What do you conclude from this?
+
+```{r}
+summary(fit)
+```
+
+c)  Use your model to predict the churn probability of customers who have made 0, 3 and 10 service calls. Calculate the probability both "by hand" and using the function predict().
+
+```{r}
+churn.pred <- predict(fit, newdata = data.frame(number.customer.service.calls=c(0, 3, 10)), 
+             type="response")
+churn.pred
+as.numeric(churn.pred > 0.5)
+```
+
+The higher the number of customer service calls, the more likely is customer churn. With 0 and 3 calls, no churn is expected. For 10 calls, churn is expected.
+
+d)  Plot the data together with the three predict values and a curve showing churn probability.
+
+```{r}
+# Add the transformed regression line (=churn probability) to the plot:
+a <- fit$coefficients[2]
+b <- fit$coefficients[1]
+
+# Define the logistic function
+logit <- function(x) (1/(1+exp(-x)))
+plot(function(x) logit(a*x+b), 0, 11, add = T, col = 4, lwd = 2)
+
+# Add the forecasted points to the plot:
+points(c(0,3,10),churn.pred , col='red',lwd=5)
+```
+
+e)  Calculate the confusion matrix and the error rate of your model. Are you satisfied with the result?
+
+```{r}
+table(data.frame(pred = as.numeric(churn.pred > 0.5), truth = churn$churn))
+```
+
+f)  Repeat task e) but now you classify all customers with a probability above 0.25 as "churn".
+
+```{r}
+table(data.frame(pred = as.numeric(churn.pred > 0.25), truth = churn$churn))
+```
+
+g)  Generate an ROC curve for your predictions and calculate the AURO.
+
+# Task 2: Quantification of costs in credit risk
+
+A financial company develops a credit risk prediction solution and compares the accuracy of several classifiers for this task. Specifically, the company decides to use the confusion matrix based on only one decision threshold and not the ROC or the PR curve for comparing classifiers. In order to do so, the company has to select a decision threshold for converting probability forecasts into 0-1 predictions. The company additionally has the following information. When rejecting a loan that would have been repaid, the average costs are estimated at CHF 10'000. Further, when giving out a loan that is not repaid, the average costs are CHF 100'000. What is the optimal decision threshold for converting predicted probabilities into 0 (=loan will be repaid) and 1 (=loan will not be repaid)?
+
+$$
+\text{FP}: L(0,1) = L(\text{truth repaid}, \text{predict not repaid}) = 10000 \\
+\text{FN}: L(1,0) = L(\text{truth not repaid}, \text{predict repaid}) = 100000
+$$
+
+```{r}
+100000 / (100000 + 10000)
+```
+
+$$
+\delta = \frac{L(0,1)}{L(1,0) + L(0,1)} = \frac{10000}{100000 + 10000} = 0.9090909
+$$
+
+# Task 3: Evaluation of classifiers
+
+a)  What are the false positive rates and the true positive rates of the two classifiers?
+
+b)  What are the precision and the recall of the two classifiers?
+
+c)  Which measure would you prefer for this example: the false positive rate or the precision? Please justify your choice.
+
+d)  What are the false positive rates and the true positive rates of the two classifiers?
+
+e)  What are the precision and the recall of the two classifiers?
+
+f)  Which measure would you prefer for this example: the false positive rate or the precision? Please justify your choice.
