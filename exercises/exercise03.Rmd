@@ -1,0 +1,107 @@
+---
+title: "Exercise 3"
+author: "Philipp Drebes"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+header-includes:
+   - \usepackage{siunitx}
+output:
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1: PCA for creating an index
+
+The goal of this exercise is to generate an index that separates the results of an Olympic heptathlon competition best. You can load the data and obtain information on the data as follows:
+
+```{r}
+library(MVA)
+?heptathlon
+```
+
+a) Have a look at the corresponding help file and try to understand the seven variables representing the seven different disciplines. For some disciplines, larger values are better, whereas for other disciplines, smaller values are better. Transform all the latter ones such that "larger means better". For instance, `heptathlon$hurdles <- with(heptathlon, max(hurdles) - hurdles)`
+
+```{r}
+data <- heptathlon
+data$hurdles <- with(heptathlon, max(hurdles) - hurdles)
+data$run200m <- with(heptathlon, max(run200m) - run200m)
+data$run800m <- with(heptathlon, max(run800m) - run800m)
+```
+
+b) Exclude the original Olympic score from the data and create a scatter plot matrix of the seven remaining variables. Verify yourself that almost all variables are positively correlated with each other.
+
+```{r}
+data <- data[1: length(data)-1 ]
+pairs(data, pch = 19)
+cor(data)
+```
+
+c) Run PCA on the data and have a look at the corresponding loadings. Why is it better to first scale the data such that all variables have variance one? What is the proportion of the variance explained by the first PC when using scaled data?
+
+```{r}
+heptathlon.pca <- princomp(x = data)
+summary(heptathlon.pca, loadings=TRUE)
+plot(heptathlon.pca)
+
+heptathlon.pca <- princomp(x = data, cor = TRUE)
+summary(heptathlon.pca, loadings=TRUE)
+plot(heptathlon.pca)
+```
+
+d) Create your PCA-based ranking by taking the scores of the first PC. Compare this score to the official Olympic score by calculating the correlation with the official score and by looking at a scatter plot. Which athlete would likely prefer our PCA-based score over the original Olympic score?
+
+```{r}
+# ranking
+scores.pca <- round(heptathlon.pca$scores[,1], digits = 2)
+scores.pca[order(scores.pca, decreasing = T)]
+
+# compare to original score
+cor(heptathlon$score, heptathlon.pca$scores[,1])
+
+plot(heptathlon$score, heptathlon.pca$scores[,1], xlab = 'Olympic score', ylab = 'PCA score')
+identify(heptathlon$score, heptathlon.pca$scores[,1], labels = rownames(heptathlon))
+```
+
+## Task 2: PCA for stock returns
+
+The data set `stock_returns.csv` contains 3024 daily returns for 14 different US stocks for the years 2005 until 2016. You can load it in R using `data <- read.csv("stock_returns.csv", header=TRUE)`
+
+a) Apply PCA to the data in stock_returns.csv. Use the option `cor=TRUE` in `princomp()`.
+
+```{r}
+data <- read.csv("../data/stock_returns.csv", header = TRUE)
+stock.pca <- princomp(data, cor = T)
+```
+
+b) Give a possible interpretation for the first three principal components.
+
+Hints:
+
+• Describe the stocks that have high loadings on PC1, PC2, and PC3.
+
+• Recall that the sign of the loadings is arbitrary.
+
+• Search for the ticker symbols on the internet in case you do not recognize the companies.
+
+```{r}
+summary(stock.pca, loadings = T)
+```
+
+Component 1: BLK, GE, XOM
+
+Component 2: C, GILD, BAX
+
+Component 3: WMT, GILD, HAS
+
+Interpretation:
+
+c) Suppose we want to achieve dimension reduction. How many principal components would you use to describe these data?
+
+R-Hint: Make a scree plot of the principal components using the function plot().
+
+```{r}
+
+```

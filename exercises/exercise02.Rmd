@@ -1,0 +1,44 @@
+---
+title: "Exercise 2"
+author: "Philipp Drebes"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+header-includes:
+   - \usepackage{siunitx}
+output:
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Task 1: Classification Trees
+
+Should a space shuttle pilot use the autolander or land manually given information on weather and the state of the space shuttle (6 variables)? Several experts discussed the "correct" decision for 256 possible settings (all possible settings given the discrete variables). Your task in this exercise is to transform the knowledge of these experts into a simple diagram that a pilot can easily use when landing.
+
+Load the package `MASS` and have a look at the data set `shuttle` which is loaded together with the package. For learning and visualizing a tree, we will need the functions `rpart`, `plot`, `text` and `print` in the package `rpart`. Have a look at the corresponding help files (e.g., `?plot.rpart` or `?text.rpart`).
+
+```{r}
+library(MASS)
+library(rpart)
+head(shuttle)
+summary(shuttle)
+```
+
+a)  Train a tree using `rpart`. Plot the result. Also look at a text representation of the tree using the `print` function and compare it with the plot. Note that for the categorical factor variables, the plot has to be interpreted as follows. For example, "error=SS" means: If the variable "error" takes on the level "SS", go to the left, otherwise go to the right. Can you confirm this by looking at the textual representation?
+
+```{r}
+shuttle.tr <- rpart(use ~ .,data = shuttle, method = 'class')
+shuttle.tr
+plot(shuttle.tr, uniform = TRUE, margin = 0.1)
+text(shuttle.tr, use.n = TRUE, pretty = TRUE)
+```
+
+b)  How many cases are misclassified (in-sample)?\
+    \\textcolor{blue}{9 were miscalssified}
+
+c)  Should the autolander be used in a situation with vis=yes and error=MM? Solve by looking at the plot and at the text representation.\
+    \\textcolor{blue}{9 were miscalssified}
+
+d)  In this example, we don't want to optimize for prediction, since all possible situations were already enumerated by the experts. Thus, create a tree that perfectly describes the opinion of the experts (i.e., don't use pruning). Create a plot and a text representation of the resulting tree.
