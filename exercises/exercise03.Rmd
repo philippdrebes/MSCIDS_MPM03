@@ -100,8 +100,32 @@ Interpretation:
 
 c) Suppose we want to achieve dimension reduction. How many principal components would you use to describe these data?
 
-R-Hint: Make a scree plot of the principal components using the function plot().
+```{r}
+screeplot(stock.pca)
+```
+
+## Task 3: PCA for protein data
+
+The data set protein.txt describes the protein consumption (in grams per day) in twenty-five European countries for nine food groups. You can read it in and preprocess it using the following code:
 
 ```{r}
+data<- read.table("protein.txt", header=T)
 
+row.names(data) <- data$Country
+
+data <- data[,-1]
 ```
+
+a) Apply PCA to the data set `protein.txt`. Use the option `cor=TRUE` in `princomp()`.
+
+b) Give a possible interpretation for the first two principal components.
+
+Hint: Look at the loadings (signs and magnitudes) of the different variables or describe the protein intake of countries that will score very high or very low on PC1 and PC2.
+
+c) Suppose we want to achieve dimension reduction. How many principal components would you use to describe this data?
+
+R-Hint: Make a scree plot of the principal components using the function plot().
+
+d) Which countries are the most and which are the least vegan (i.e., no animal products)? Which countries eat the most fish, fruits, and vegetables?
+
+Hint: Look at the scores of the different countries on the first two principal components. For doing this, use `pc$scores[,1:2]`.
