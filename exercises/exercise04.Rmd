@@ -32,5 +32,84 @@ text(-cities.coords[,1], -cities.coords[,2], labels = row.names(cities.coords))
 b)  The goal of this exercise is to investigate how well the MDS reconstruction approximates the true distances by comparing the original distances with the distances from the MDS solution. Plot the points using the distances of the MDS solution as y-axis and the original distances as the x-axis. Which range of points of the distances are well approximated?
 
 ```{r}
-# Use as.vector(as.matrix()) to convert a distance matrix to a vector for plotting
+mds.dist <- as.vector(as.matrix(dist(cities.coords, diag=T, upper=T)))
+orig.dist <- as.vector(as.matrix(cities))
+
+fit <- lm(mds.dist ~ orig.dist)
+plot(orig.dist, mds.dist)
+abline(fit, col = 4)
 ```
+
+The points below 100km and 300km distance, are well approximated.
+
+## Task 2: MDS for country statistics
+
+We collected data on 180 countries from the CIA World Fact Book1 on the variables: area, population size, life expectancy, fertility rate, GDP (purchasing power parity), GDP growth, unemployment rate. The values are either 2011 or 2012 estimates.
+
+a)  Load the data `countries.rda` and look at the summary of the data set. Scale the data such that all variables have mean 0 and variance 1.
+
+```{r}
+load(file="../data/countries.rda")
+summary(countries)
+
+centered.countries <- scale(countries, center = TRUE, scale = TRUE)
+summary(centered.countries)
+```
+
+b)  Compute Euclidean distances and perform multidimensional scaling (MDS). What is the number of dimensions that should be used?
+
+```{r}
+countries.dist <- dist(centered.countries)
+
+countries.mds <- cmdscale(countries.dist, k = 2, eig = T)
+countries.coords <- countries.mds$points
+
+
+
+num_data <- attr(countries.dist, "Size")
+
+## Choosing the dimension
+mds <- cmdscale(countries.dist, k = num_data - 1, eig = T)
+ev <- mds$eig
+
+## Choose number of dimensions
+cumsum(ev) / sum(ev)
+cumsum(abs(ev)) / sum(abs(ev))
+cumsum(ev^2) / sum(ev^2)
+
+## Scree plot
+barplot(Eigenvalue ~ Coordinate,
+        data = data.frame(Eigenvalue=ev[1:(num_data-1)],Coordinate=1:(num_data-1)))
+```
+
+c)  Refit with two dimensions. Plot dots for all the countries and highlight Switzerland.
+
+```{r}
+countries.mds <- cmdscale(dist(centered.countries), k = 2, eig = T)
+countries.coords <- countries.mds$points
+```
+
+d)  Find the three countries that are most similar to Switzerland.
+
+```{r}
+plot(countries.coords)
+identify(countries.coords[,1], countries.coords[,2], labels = rownames(countries.coords))
+```
+
+e)  Perform PCA and plot the first two principal components.
+
+```{r}
+
+```
+
+f)  Why is it necessary to scale the data if we want to apply multidimensional scaling (MDS)?
+
+```{r}
+
+```
+
+## Task 4
+
+$$
+\frac{1}{8} \cdot (1 + 0 + 0 + 1 + 1 + 1 + 1.5/4.1 + 1.8/4.3) = 0.598
+$$
