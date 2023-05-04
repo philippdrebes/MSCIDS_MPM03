@@ -1,0 +1,36 @@
+---
+title: "Exercise 4"
+author: "Philipp Drebes"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+header-includes:
+   - \usepackage{siunitx}
+output:
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1: MDS for road distances
+
+The data `ch-dist.dat` consists of distances between 12 Swiss cities. We would like to determine the location of these cities. The distances are given as fastest road routes, not shortest routes nor air distances.
+
+a)  Determine the "coordinates" of these cities using classical MDS and plot the resulting points. Are the locations of the cities approximately equal to their locations on the map of Switzerland? For comparison you may have to reflect or transform the coordinates.
+
+```{r}
+cities <- read.table("../data/ch-dist.dat", header=TRUE)
+head(cities)
+
+cities.mds <- cmdscale(cities, k = 2, eig = TRUE)
+cities.coords <- cities.mds$points
+plot(-cities.coords[,1], -cities.coords[,2], type = 'n')
+text(-cities.coords[,1], -cities.coords[,2], labels = row.names(cities.coords))
+```
+
+b)  The goal of this exercise is to investigate how well the MDS reconstruction approximates the true distances by comparing the original distances with the distances from the MDS solution. Plot the points using the distances of the MDS solution as y-axis and the original distances as the x-axis. Which range of points of the distances are well approximated?
+
+```{r}
+# Use as.vector(as.matrix()) to convert a distance matrix to a vector for plotting
+```
