@@ -1,0 +1,68 @@
+---
+title: "Exercise 5"
+author: "Philipp Drebes"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+header-includes:
+   - \usepackage{siunitx}
+output:
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1: Hierarchical Clustering
+
+The data `empl2.dat` contains the rate of employment (in percent, rounded) in 9 different sectors in 10 European countries in the year 1979. The countries are the following ones: B Belgium, CH Switzerland, CS Czechoslovakia, D BRD, GB Great Britain, GR Greece, H Hungary, S Sweden, TR Turkey, YU Yugoslavia.
+
+a)  First look at the data using a scatterplot. Can you find clusters by eye?
+
+```{r}
+empl <- read.table('../data/empl2.dat', header=T)
+labempl <- rownames(empl)
+pairs(empl, panel=function(x,y) text(x,y, labels=labempl,xpd=T))
+```
+
+b)  Calculate the Euclidean distances between the states. Which two states are first combined into a cluster?
+
+```{r}
+empl.dist <- dist(empl)
+round(empl.dist, 2)
+min(empl.dist)
+```
+
+c)  Carry out a hierarchical cluster analysis by hand using the "single linkage"-method. Hints: Recall how the distance between two clusters is defined in the single linkage method and based on this, think of how the algorithm proceeds.
+
+```{r}
+
+```
+
+d)  Carry out the previous cluster analysis using the function `hclust()`. Verify your result of c) by comparing the first five steps.
+
+```{r}
+empl.single <- hclust(empl.dist, method='single')
+plot(empl.single)
+```
+
+e)  Carry out the cluster analysis with the same distances but with the methods average and complete. Compare the dendrograms of all three methods.
+
+```{r}
+empl.avg <- hclust(empl.dist, method='average')
+plot(empl.avg)
+
+empl.comp <- hclust(empl.dist, method='complete')
+plot(empl.comp)
+```
+
+f)  Group the states into k clusters. Choose for instance k = 4 or k = 3. Compare the different methods from d) and e). Also plot an MDS-plot and mark the observed groups of states with colors (for one k and one method).
+
+```{r}
+# Classification in three groups using Single Linkage 
+r.3scl <- cutree(sing.empl, k=3)
+split(labempl, r.3scl)
+r.mds <- cmdscale(...)
+plot(r.mds, type = "n", asp=1, main = "Single clustering, MDS coordinates")
+text(r.mds, labempl, col = 1 + r.3scl)
+```

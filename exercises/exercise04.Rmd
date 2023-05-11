@@ -108,6 +108,52 @@ f)  Why is it necessary to scale the data if we want to apply multidimensional s
 
 ```
 
+## Task 3
+
+The file `mnist_2k.Rdata` contains images and labels of 2000 randomly chosen hand-written digits, from the MNIST data set. Load the data (read in with `load()`) and familiarize yourself with the data.
+
+a)  Visualize one image.
+
+```{r}
+## Load data
+load(file="../data/mnist_2k.Rdata")
+
+table(x$label) ## Frequencies of of digigts
+names(x)[1:10]
+
+## Create colors for digits (used below in plots)
+coldigits=rainbow(10)[x[,1]+1]
+
+## Visualize one image
+N <- 28 # width/height of mnist images in pixels
+i <- 620 # pick number of image to visualize
+image <- matrix(as.numeric(x[i, -1]), ncol = 28, byrow = TRUE)
+heatmap(image, Rowv = NA, Colv = NA, revC = TRUE, asp = 1, scale = "none")
+```
+
+b)  Run PCA for the data. Which percentage of the total variance is explained by the first two principal components? Create a 2D plot with the scores and use colors to mark the points according to the corresponding labels (i.e., the digits).
+
+```{r}
+digits.pca <- princomp(x[,-1])
+plot(digits.pca)
+cumsum(digits.pca$sdev[1:20]^2 / sum(digits.pca$sdev^2))
+
+plot(digits.pca$score[,1], digits.pca$score[,2],col=coldigits,xlab ="",ylab="")
+legend("bottomright",legend=0:9,col=rainbow(10),bty = "n",pch=1,pt.lwd=2)
+```
+
+c)  Run t-SNE to obtain a two-dimensional representation of the data. Compare to the results from PCA and comment on the differences.
+
+```{r}
+library(Rtsne)
+
+set.seed(9898)
+
+digits.tsne <- Rtsne(x[, -1], dims = 2, perplexity = 20, max_iter = 1000)
+plot(digits.tsne$Y[,1], digits.tsne$Y[,2], xlab = "", ylab = "", col = coldigits)
+legend("topleft", legend = 0:9, col = rainbow(10), bty = "n", pch = 1, pt.lwd = 2)
+```
+
 ## Task 4
 
 $$
