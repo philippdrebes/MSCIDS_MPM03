@@ -60,9 +60,126 @@ f)  Group the states into k clusters. Choose for instance k = 4 or k = 3. Compar
 
 ```{r}
 # Classification in three groups using Single Linkage 
-r.3scl <- cutree(sing.empl, k=3)
+r.3scl <- cutree(empl.single, k=3)
 split(labempl, r.3scl)
-r.mds <- cmdscale(...)
+r.mds <- cmdscale(empl.dist)
 plot(r.mds, type = "n", asp=1, main = "Single clustering, MDS coordinates")
 text(r.mds, labempl, col = 1 + r.3scl)
 ```
+
+```{r}
+r.3avg <- cutree(empl.avg, k=3)
+split(labempl, r.3avg)
+r.mds <- cmdscale(empl.dist)
+plot(r.mds, type = "n", asp=1, main = "Average clustering, MDS coordinates")
+text(r.mds, labempl, col = 1 + r.3avg)
+```
+
+```{r}
+r.3comp <- cutree(empl.comp, k=3)
+split(labempl, r.3comp)
+r.mds <- cmdscale(empl.dist)
+plot(r.mds, type = "n", asp=1, main = "Complete clustering, MDS coordinates")
+text(r.mds, labempl, col = 1 + r.3comp)
+```
+
+## Task 2: K-means and PAM Clustering
+
+The data set banknot.dat contains data about forged and unforged banknotes for the following variables: - CODE: 0 unforged banknotes, 1 forged banknotes. - LENGTH, LEFT, RIGHT, BOTTOM, TOP, DIAGONAL: different measures of the banknotes. In this exercise, we use a reduced data set containing only the variables CODE, BOTTOM and DIAGONAL. We want to investigate if we can separate forged from unforged banknotes (considering only the measures BOTTOM and DIAGONAL of the banknotes) with k-means clustering and PAM.
+
+a)  Load the data and apply the k-means algorithm.
+
+<!-- -->
+
+i.  Apply the k-means algorithm to the data (without CODE), to obtain 2 clusters (ideally one for forged and one for unforged banknotes).
+
+```{r}
+d.bank.org <- read.table("../data/banknot.dat")
+d.bank <- d.bank.org[,c("CODE","BOTTOM","DIAGONAL")]
+d.bank.bd <- d.bank[,c("BOTTOM", "DIAGONAL")]
+
+bkm <- kmeans(d.bank.bd, nstart = 10, centers = 2)
+d.bank.grpskm <- bkm$cluster
+d.bank.grpskm
+
+plot(d.bank.bd, pch = d.bank.grpskm, col=d.bank.grpskm, lwd=2)
+legend("bottomright", legend = 1:2, pch = 1:2, col=1:2, bty="n")
+```
+
+ii. Make a table of the misclassifications of the algorithm with respect to the true classifications given in the variable CODE.
+
+```{r}
+table(d.bank[,"CODE"], d.bank.grpskm)
+```
+
+iii. Make a silhouette-plot. What do you observe?
+
+```{r}
+library(cluster)
+t.bank <- dist(d.bank, method="euclidean")
+kmean.sl <- silhouette(bkm$cluster,t.bank)
+plot(kmean.sl)
+```
+
+b)  Perform the same analysis using partitioning around medoids (PAM).
+
+<!-- -->
+
+i.  Apply the PAM algorithm to the data (without CODE), to obtain 2 clusters.
+
+```{r}
+pamB <- pam(x = d.bank.bd, k = 2)
+
+plot(pamB, which = 1)
+```
+
+ii. Make a table of the misclassifications as in a).
+
+```{r}
+table(d.bank[,"CODE"], pamB$clustering)
+```
+
+iii. Plot the two variables BOTTOM and DIAGONAL by using different point shapes for the different clusters and different colors for the CODE. Which observations were classified wrong?
+
+```{r}
+plot(d.bank.bd, pch = pamB$clustering, col=d.bank[,"CODE"] + 1, lwd=2)
+legend("bottomright", legend = 1:2, pch = 1:2, bty="n")
+```
+
+iv. Look at the two cluster representatives (medoids). How do the two clusters compare?
+
+```{r}
+pamB$medoids
+
+d.bank[pamB$medoids,]
+```
+
+v.  Make a silhouette-plot. What do you observe?
+
+```{r}
+plot(pamB , which=2)
+```
+
+c)  Compare the results of the two methods. Use a table for comparing the clusterings of the two methods. Note: The cluster values of a point do not have to be the same for the two methods - this means a point can have value 1 with the k-means method and value 2 with the PAM-method.
+
+```{r}
+## Obtaining cluster assignments: ...$cluster and ...$clustering
+table(d.bank.grpskm, pamB$clustering)
+```
+
+## Task 3: Model Based Clustering
+In this exercise, we would like to apply the Gaussian mixture model based clustering to the dataset banknot.dat.
+a) Perform clustering with Mclust() from the package mclust using the maximum likelihood method (without the variable CODE). What number of clusters and what model is the best?
+```{r}
+d.bank.org <- read.table("banknot.dat")
+ml.banknot <- Mclust(d.bank.org [,-1])
+plot(... , what="BIC")
+ml.cluster <- Mclust(... , modelNames="..." , G= ...)
+# Here modelNames is the choice of method for the structure of the covariance matrix (EEE to VVV) and G the number of clusters.
+```
+
+b) Make a table with the misclassification of the model based method with respect to CODE. Keep in mind: CODE=0 are the genuine banknotes and CODE=1 the forged ones. Make a pairs plot of the variables by choosing the color of the dots according to CODE (col=) and the shape according to their model based method (pch=). What do you observe?
+```{r}
+
+```
+
