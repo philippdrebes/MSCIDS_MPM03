@@ -73,6 +73,15 @@ table(data.frame(pred = as.numeric(churn.pred > 0.25), truth = churn$churn))
 
 g)  Generate an ROC curve for your predictions and calculate the AURO.
 
+```{r}
+library(ROCR)
+roc_curve <- ROCR::prediction(churn.pred, churn$churn)
+plot(performance(roc_curve,"tpr","fpr"),col=2,lwd=2)
+abline(a=0,b=1,lty=2)
+performance(roc_curve, "auc")@y.values[[1]]
+```
+
+
 # Task 2: Quantification of costs in credit risk
 
 A financial company develops a credit risk prediction solution and compares the accuracy of several classifiers for this task. Specifically, the company decides to use the confusion matrix based on only one decision threshold and not the ROC or the PR curve for comparing classifiers. In order to do so, the company has to select a decision threshold for converting probability forecasts into 0-1 predictions. The company additionally has the following information. When rejecting a loan that would have been repaid, the average costs are estimated at CHF 10'000. Further, when giving out a loan that is not repaid, the average costs are CHF 100'000. What is the optimal decision threshold for converting predicted probabilities into 0 (=loan will be repaid) and 1 (=loan will not be repaid)?
@@ -94,12 +103,73 @@ $$
 
 a)  What are the false positive rates and the true positive rates of the two classifiers?
 
+```{r}
+# Classifier I: False positive rate
+500 / (500 + 998500)
+
+# Classifier I: True positive rate
+800 / (800 + 200)
+
+# Classifier II: False positive rate
+2000 / (2000 + 997000)
+
+# Classifier II: True positive rate
+850 / (850 + 150)
+```
+
 b)  What are the precision and the recall of the two classifiers?
+
+```{r}
+# Classifier I: Precision
+800 / (800 + 500)
+
+# Classifier I: Recall
+800 / (800 + 200)
+
+# Classifier II: Precision
+850 / (850 + 2000)
+
+# Classifier II: Recall
+850 / (850 + 150)
+```
+
 
 c)  Which measure would you prefer for this example: the false positive rate or the precision? Please justify your choice.
 
+In terms of the false positive rate, both classifiers are almost equally good. However, the precision shows that there are clear differences between the two classifiers with classifier I having approximately a two times higher precision compared to classifier II. For this reason, the precision is preferred over the false positive rate.
+
 d)  What are the false positive rates and the true positive rates of the two classifiers?
+
+```{r}
+# Classifier I: False positive rate
+400500 / (400500 + 598500)
+
+# Classifier I: True positive rate
+800 / (800 + 200)
+
+# Classifier II: False positive rate
+452000 / (452000 + 547000)
+
+# Classifier II: True positive rate
+850 / (850 + 150)
+```
 
 e)  What are the precision and the recall of the two classifiers?
 
+```{r}
+# Classifier I: Precision
+800 / (800 + 400500)
+
+# Classifier I: Recall
+800 / (800 + 200)
+
+# Classifier II: Precision
+850 / (850 + 452000)
+
+# Classifier II: Recall
+850 / (850 + 150)
+```
+
 f)  Which measure would you prefer for this example: the false positive rate or the precision? Please justify your choice.
+
+In terms of the precision, both classifiers are almost equally good. However, the false positive rate shows that there are differences between the two classifiers with classifier I having a lower false positive rate compare to classifier II. For this reason, the false positive rate is preferred over the precision.

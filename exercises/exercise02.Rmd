@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Task 1: Classification Trees
+## Task 1: Classification Trees
 
 Should a space shuttle pilot use the autolander or land manually given information on weather and the state of the space shuttle (6 variables)? Several experts discussed the "correct" decision for 256 possible settings (all possible settings given the discrete variables). Your task in this exercise is to transform the knowledge of these experts into a simple diagram that a pilot can easily use when landing.
 
@@ -42,3 +42,72 @@ c)  Should the autolander be used in a situation with vis=yes and error=MM? Solv
     \\textcolor{blue}{9 were miscalssified}
 
 d)  In this example, we don't want to optimize for prediction, since all possible situations were already enumerated by the experts. Thus, create a tree that perfectly describes the opinion of the experts (i.e., don't use pruning). Create a plot and a text representation of the resulting tree.
+
+## Task 2: Random Forest
+
+In this exercise, we try to detect spam given some features of an email.
+
+a)  Load the data set "spam" and fit a Random Forest using the `randomForest` package with the default settings (you might want to call `set.seed(123)` first in order to reproduce the solution). Be patient: this may take several seconds. Note that for a faster implementation of random forest in R, you can also use the `ranger` package.
+
+```{r}
+library(ranger)
+
+set.seed(123)
+load(file='../data/spam.rda')
+str(spam)
+
+forest <- ranger(spam ~ ., data = spam)
+forest
+```
+
+b)  Plot the error rate vs. the number of fitted trees. How many trees are necessary? Refit the model with the chosen number of trees. How long does it take now? Hint: you can use the system.time() function to measure time.
+
+```{r}
+plot(forest$prediction.error ~ forest$forest$num.trees)
+```
+
+c)  Have a look at the output. What error rate do you expect for new predictions (OOB error rate)? What is the error rate for the 'spam'-class?
+
+```{r}
+# OOB prediction error:             4.61 %
+```
+
+d)  Suppose we get a new email and want to predict the spam label. For simplicity, we refit the Random Forest on 2601 randomly chosen emails and save the remaining 2000 emails as test set. How does the OOB error compare with the error on the test set? (use `ntree = 100`, and `set.seed = 123`)
+
+```{r}
+library(dplyr)
+library(caret)
+
+set.seed(123)
+
+idxs <- createDataPartition(spam$spam, p = 0.56, list = F)
+train <- spam %>% slice(idxs)
+test <- spam %>% slice(-idxs)
+
+forest <- ranger(spam ~ ., data = train, num.trees = 100)
+forest
+
+pred <- predict(forest, data = test)
+
+confusionMatrix(pred$predictions, test$spam)
+mean(pred$predictions != test$spam)
+```
+
+e)  Suppose we don't want to compute all variables for each new incoming mail, but only use the 5 most important ones. Which 5 variables should we choose? Compare the OOB error using all variables, the 5 most important and the 5 least important ones (according to decrease in accuracy; use ntree = 100 and seed = 123)
+
+```{r}
+rf.spam <- ranger(spam ~ ., data = train, importance = "impurity")
+head(sort(rf.spam$variable.importance, decreasing = T), 5)
+head(sort(rf.spam$variable.importance, decreasing = F), 5)
+
+rf.spam
+
+rf.spam.top5 <- ranger(spam ~ A.52 + A.53 + A.55 + A.16 + A.7, 
+                       data = train, importance = "impurity")
+rf.spam.top5
+
+rf.spam.low5 <- ranger(spam ~   A.47 + A.38 + A.32 + A.41 + A.48, 
+                       data = train, importance = "impurity")
+rf.spam.low5
+
+```

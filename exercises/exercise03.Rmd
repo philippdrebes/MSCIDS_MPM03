@@ -22,7 +22,7 @@ library(MVA)
 ?heptathlon
 ```
 
-a) Have a look at the corresponding help file and try to understand the seven variables representing the seven different disciplines. For some disciplines, larger values are better, whereas for other disciplines, smaller values are better. Transform all the latter ones such that "larger means better". For instance, `heptathlon$hurdles <- with(heptathlon, max(hurdles) - hurdles)`
+a)  Have a look at the corresponding help file and try to understand the seven variables representing the seven different disciplines. For some disciplines, larger values are better, whereas for other disciplines, smaller values are better. Transform all the latter ones such that "larger means better". For instance, `heptathlon$hurdles <- with(heptathlon, max(hurdles) - hurdles)`
 
 ```{r}
 data <- heptathlon
@@ -31,7 +31,7 @@ data$run200m <- with(heptathlon, max(run200m) - run200m)
 data$run800m <- with(heptathlon, max(run800m) - run800m)
 ```
 
-b) Exclude the original Olympic score from the data and create a scatter plot matrix of the seven remaining variables. Verify yourself that almost all variables are positively correlated with each other.
+b)  Exclude the original Olympic score from the data and create a scatter plot matrix of the seven remaining variables. Verify yourself that almost all variables are positively correlated with each other.
 
 ```{r}
 data <- data[1: length(data)-1 ]
@@ -39,7 +39,7 @@ pairs(data, pch = 19)
 cor(data)
 ```
 
-c) Run PCA on the data and have a look at the corresponding loadings. Why is it better to first scale the data such that all variables have variance one? What is the proportion of the variance explained by the first PC when using scaled data?
+c)  Run PCA on the data and have a look at the corresponding loadings. Why is it better to first scale the data such that all variables have variance one? What is the proportion of the variance explained by the first PC when using scaled data?
 
 ```{r}
 heptathlon.pca <- princomp(x = data)
@@ -51,7 +51,7 @@ summary(heptathlon.pca, loadings=TRUE)
 plot(heptathlon.pca)
 ```
 
-d) Create your PCA-based ranking by taking the scores of the first PC. Compare this score to the official Olympic score by calculating the correlation with the official score and by looking at a scatter plot. Which athlete would likely prefer our PCA-based score over the original Olympic score?
+d)  Create your PCA-based ranking by taking the scores of the first PC. Compare this score to the official Olympic score by calculating the correlation with the official score and by looking at a scatter plot. Which athlete would likely prefer our PCA-based score over the original Olympic score?
 
 ```{r}
 # ranking
@@ -69,14 +69,14 @@ identify(heptathlon$score, heptathlon.pca$scores[,1], labels = rownames(heptathl
 
 The data set `stock_returns.csv` contains 3024 daily returns for 14 different US stocks for the years 2005 until 2016. You can load it in R using `data <- read.csv("stock_returns.csv", header=TRUE)`
 
-a) Apply PCA to the data in stock_returns.csv. Use the option `cor=TRUE` in `princomp()`.
+a)  Apply PCA to the data in stock_returns.csv. Use the option `cor=TRUE` in `princomp()`.
 
 ```{r}
 data <- read.csv("../data/stock_returns.csv", header = TRUE)
 stock.pca <- princomp(data, cor = T)
 ```
 
-b) Give a possible interpretation for the first three principal components.
+b)  Give a possible interpretation for the first three principal components.
 
 Hints:
 
@@ -98,7 +98,7 @@ Component 3: WMT, GILD, HAS
 
 Interpretation:
 
-c) Suppose we want to achieve dimension reduction. How many principal components would you use to describe these data?
+c)  Suppose we want to achieve dimension reduction. How many principal components would you use to describe these data?
 
 ```{r}
 screeplot(stock.pca)
@@ -109,23 +109,48 @@ screeplot(stock.pca)
 The data set protein.txt describes the protein consumption (in grams per day) in twenty-five European countries for nine food groups. You can read it in and preprocess it using the following code:
 
 ```{r}
-data<- read.table("protein.txt", header=T)
+data<- read.table("../data/protein.txt", header=T)
 
 row.names(data) <- data$Country
 
 data <- data[,-1]
 ```
 
-a) Apply PCA to the data set `protein.txt`. Use the option `cor=TRUE` in `princomp()`.
+a)  Apply PCA to the data set `protein.txt`. Use the option `cor=TRUE` in `princomp()`.
 
-b) Give a possible interpretation for the first two principal components.
+```{r}
+pca.protein <- princomp(data, cor = T)
+pca.protein
+```
+
+b)  Give a possible interpretation for the first two principal components.
 
 Hint: Look at the loadings (signs and magnitudes) of the different variables or describe the protein intake of countries that will score very high or very low on PC1 and PC2.
 
-c) Suppose we want to achieve dimension reduction. How many principal components would you use to describe this data?
+```{r}
+summary(pca.protein, loadings = T)
+```
+
+-   PC1 is a measure of total animal products versus non-animal products consumption. Countries with high scores on PC1 eat a lot of animal products and countries with a low score on PC1 eat a lot of non-animal products.
+
+-   PC2 is a measure for fish and fruit/vegetable consumption. Countries with a low (negative) score on PC2 eat a lot of fish and/or fruits and vegetables. Countries with a high PC2 score eat little fish, fruits, and vegetables.
+
+c)  Suppose we want to achieve dimension reduction. How many principal components would you use to describe this data?
 
 R-Hint: Make a scree plot of the principal components using the function plot().
 
-d) Which countries are the most and which are the least vegan (i.e., no animal products)? Which countries eat the most fish, fruits, and vegetables?
+```{r}
+plot(pca.protein)
+```
+
+d)  Which countries are the most and which are the least vegan (i.e., no animal products)? Which countries eat the most fish, fruits, and vegetables?
 
 Hint: Look at the scores of the different countries on the first two principal components. For doing this, use `pc$scores[,1:2]`.
+
+```{r}
+pca.protein$scores[,1:2]
+```
+
+Since PC1 has positive loadings on all animal products, a positive score on PC1 means high animal product consumption and a negative score on PC1 means low animal product consumption. Albania and (former) Yugoslavia have the lowest animal product consumption.
+
+Further, since the loadings of fish, fruits, and vegetables on PC2 are negative, a negative score on PC2 means high consumption of fish, fruits, and vegetables. Portugal and Spain eat the most fish, fruits, and vegetables.
